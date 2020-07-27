@@ -6,105 +6,93 @@ const form = document.getElementById("form");
 const text = document.getElementById("text");
 const amount = document.getElementById("amount");
 
-// const transactions = [
-//   { id: 1, text: "Flower", amount: -20 },
-//   { id: 2, text: "Salary", amount: 300 },
-//   { id: 3, text: "Book", amount: -10 },
-//   { id: 4, text: "Camera", amount: 150 },
+// const dummyTransactions = [
+//   { id: 1, text: 'Flower', amount: -20 },
+//   { id: 2, text: 'Salary', amount: 300 },
+//   { id: 3, text: 'Book', amount: -10 },
+//   { id: 4, text: 'Camera', amount: 150 }
 // ];
 
-const localStorageTransactions = 
-JSON.parse(localStorage.getItem('transactions'));
+const transactionsFromLS = 
+  JSON.parse(localStorage.getItem('transactions'));
 
 let transactions = 
-localStorage.getItem('transactions') !== null ? 
-localStorageTransactions : [];
+  localStorage.getItem('transactions') !== null 
+  ? transactionsFromLS 
+  : [];
+console.log(transactions);
 
-// Add transaction
-function addTransaction(e) {
+
+function generateID(){
+  return Math.floor(Math.random()* 1000000);
+}
+
+function addTrasactionInArray(e){
   e.preventDefault();
-  if (text.value.trim() === '' || amount.value.trim() === '') {
-    alert('Please add a text and amount');
+  if(text.value.trim() === '' || amount.value.trim() === ''){
+    alert('Please add text and amount')
   } else {
     const transaction = {
       id: generateID(),
       text: text.value,
-      amount: +amount.value
-    };
-
+      amount: Number(amount.value)
+    }
     transactions.push(transaction);
-    addTransactionDOM(transaction);
-    updateValues();
-    updateLocalStorage();
-
+    init();
     text.value = '';
     amount.value = '';
   }
 }
 
-// Generate random ID
-function generateID() {
-  return Math.floor(Math.random() * 100000000);
-}
-
-// Add transaction to DOM list
-function addTransactionDOM(transaction) {
-  // Get sign
-  const sign = transaction.amount < 0 ? "-" : "+";
-  const item = document.createElement("li");
-  // Add class based on value
-  item.classList.add(transaction.amount < 0 ? "minus" : "plus");
+function addTransactionInDOM(tr){
+  const sign = tr.amount < 0 ? '-' : '+';
+  const item = document.createElement('li');
+  item.classList.add(tr.amount < 0 ? 'minus' : 'plus');
   item.innerHTML = `
-    ${transaction.text} <span>${sign}${Math.abs(transaction.amount)}</span>
-    <button class="delete-btn" onclick="removeTransaction(${transaction.id})">x</button>
-  `;
+    ${tr.text}
+    <span>${sign}${Math.abs(tr.amount)}</span>
+    <button 
+      class="delete-btn"
+      onclick="removeTransaction(${tr.id})">X
+    </button>`;
   list.appendChild(item);
 }
 
-// Update the balance, income and expense
-function updateValues() {
-  const amounts = transactions.map((transaction) => transaction.amount);
-  const total = amounts
-    .reduce((acc, item) => (acc += item), 0)
-    .toFixed(2);
-
-  const income = amounts
-    .filter((item) => item > 0)
-    .reduce((acc, item) => (acc += item), 0)
-    .toFixed(2);
-
-  const expence = (amounts
-    .filter((item) => item < 0)
-    .reduce((acc, item) => (acc += item), 0)* -1) 
-    .toFixed(2);
-
-  balance.innerText = `$${total}`;
-  money_plus.innerText = `$${income}`;
-  money_minus.innerText = `$${expence}`;
-}
-
-
-// Remove transaction by ID
-function removeTransaction(id) {
-  transactions = transactions
-    .filter(transaction => transaction.id !== id);
-  updateLocalStorage();
+function removeTransaction(id){
+  transactions = 
+    transactions.filter(transaction => transaction.id !== id);
   init();
 }
 
-// Update local storage transactions
-function updateLocalStorage(){
-  localStorage.setItem('transactions', JSON.stringify(transactions))
+function updateLS(){
+  localStorage.setItem('transactions', JSON.stringify(transactions));
 }
 
-// Init app
-function init() {
-  list.innerHTML = "";
-  // transactions.forEach(addTransactionDOM);
-  // Orr
-  transactions.forEach((transaction) => addTransactionDOM(transaction));
+function updateValues(){
+  const amounts = transactions.map(transaction => transaction.amount);
+  const income = amounts
+    .filter(item => item > 0)
+    .reduce((acc, item) => (acc += item), 0)
+    .toFixed(2);
+  const expense = Math.abs(amounts
+    .filter(item => item < 0)
+    .reduce((acc, item) => (acc += item), 0))
+    .toFixed(2);
+  const total = (income - expense)
+  .toFixed(2);
+  money_plus.innerHTML = `$${income}`;
+  money_minus.innerHTML = `$${expense}`;
+  balance.innerHTML = `$${total}`;
+}
+
+function init(){
+  list.innerHTML = '';
+  transactions.forEach(addTransactionInDOM);
   updateValues();
+  updateLS();
 }
 
 init();
-form.addEventListener('submit', addTransaction);
+
+// Event Listener
+form.addEventListener('submit', addTrasactionInArray);
