@@ -27,7 +27,7 @@ function generateID(){
   return Math.floor(Math.random()* 1000000);
 }
 
-function addTrasactionInArray(e){
+function addTransactionInArray(e){
   e.preventDefault();
   if(text.value.trim() === '' || amount.value.trim() === ''){
     alert('Please add text and amount')
@@ -95,4 +95,4 @@ function init(){
 init();
 
 // Event Listener
-form.addEventListener('submit', addTrasactionInArray);
+form.addEventListener('submit', addTransactionInArray);
